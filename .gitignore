@@ -1,3 +1,7 @@
 *.a
 *.o
 .*.swp
+bcftools/bcftools
+bgzip
+samtools
+tabix
