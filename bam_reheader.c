@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "knetfile.h"
 #include "bgzf.h"
 #include "bam.h"
 
@@ -14,18 +15,18 @@ int bam_reheader(BGZF *in, const bam_header_t *h, int fd)
 	if (in->open_mode != 'r') return -1;
 	buf = malloc(BUF_SIZE);
 	old = bam_header_read(in);
-	fp = bgzf_fdopen(fd, "w");
+	fp = bgzf_dopen(fd, "w");
 	bam_header_write(fp, h);
 	if (in->block_offset < in->block_length) {
 		bgzf_write(fp, in->uncompressed_block + in->block_offset, in->block_length - in->block_offset);
 		bgzf_flush(fp);
 	}
 #ifdef _USE_KNETFILE
-	while ((len = knet_read(in->x.fpr, buf, BUF_SIZE)) > 0)
-		fwrite(buf, 1, len, fp->x.fpw);
+	while ((len = knet_read(in->fp, buf, BUF_SIZE)) > 0)
+		fwrite(buf, 1, len, fp->fp);
 #else
-	while (!feof(in->file) && (len = fread(buf, 1, BUF_SIZE, in->file)) > 0)
-		fwrite(buf, 1, len, fp->file);
+	while (!feof(in->fp) && (len = fread(buf, 1, BUF_SIZE, in->fp)) > 0)
+		fwrite(buf, 1, len, fp->fp);
 #endif
 	free(buf);
 	fp->block_offset = in->block_offset = 0;

@@ -10,7 +10,9 @@ AOBJS=		bam_tview.o bam_plcmd.o sam_view.o \
 			bam_rmdup.o bam_rmdupse.o bam_mate.o bam_stat.o bam_color.o \
 			bamtk.o kaln.o bam2bcf.o bam2bcf_indel.o errmod.o sample.o \
 			cut_target.o phase.o bam2depth.o bam_qa.o padding.o
-PROG=		samtools
+TABIX_LOBJS=	index.o bgzf.o kstring.o knetfile.o bedidx.o
+TABIX_AOBJS=	tabix.o
+PROG=		samtools tabix bgzip
 INCLUDES=	-I.
 SUBDIRS=	. bcftools misc
 LIBPATH=
@@ -37,7 +39,7 @@ all:$(PROG)
 .PHONY:all lib clean cleanlocal
 .PHONY:all-recur lib-recur clean-recur cleanlocal-recur install-recur
 
-lib:libbam.a
+lib:libbam.a libtabix.a libsamtabix.a
 
 libbam.a:$(LOBJS)
 		$(AR) -csru $@ $(LOBJS)
@@ -90,7 +92,33 @@ dylib:
 		esac
 
 
+libtabix.so.1:$(TABIX_LOBJS)
+		$(CC) -shared -Wl,-soname,libtabix.so -o $@ $(TABIX_LOBJS) -lc -lz
+
+libtabix.1.dylib:$(TABIX_LOBJS)
+		libtool -dynamic $(TABIX_LOBJS) -o $@ -lc -lz
+
+libtabix.a:$(TABIX_LOBJS)
+		$(AR) -csru $@ $(TABIX_LOBJS)
+
+tabix:lib $(TABIX_AOBJS)
+		$(CC) $(CFLAGS) -o $@ $(TABIX_AOBJS) -L. -ltabix -lm $(LIBPATH) -lz
+
+TabixReader.class:TabixReader.java
+		javac -cp .:sam.jar TabixReader.java
+
+index.o:bgzf.h tabix.h khash.h ksort.h kstring.h
+tabix.o:tabix.h kstring.h bgzf.h
+
+tabix.pdf:tabix.tex
+		pdflatex tabix.tex
+
+
+libsamtabix.a:	$(LOBJS) index.o
+		$(AR) -csru $@ $(LOBJS) index.o
+
+
 cleanlocal:
-		rm -fr gmon.out *.o a.out *.exe *.dSYM razip bgzip $(PROG) *~ *.a *.so.* *.so *.dylib
+		rm -fr gmon.out *.o a.out *.exe *.dSYM razip $(PROG) *~ *.a *.so.* *.so *.dylib tabix.aux tabix.log tabix.pdf *.class
 
 clean:cleanlocal-recur

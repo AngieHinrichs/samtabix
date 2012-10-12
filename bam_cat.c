@@ -59,6 +59,7 @@ all:bam_cat
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "knetfile.h"
 #include "bgzf.h"
 #include "bam.h"
 
@@ -79,7 +80,7 @@ int bam_cat(int nfn, char * const *fn, const bam_header_t *h, const char* outbam
     const int es=BGZF_EMPTY_BLOCK_SIZE;
     int i;
     
-    fp = strcmp(outbam, "-")? bgzf_open(outbam, "w") : bgzf_fdopen(fileno(stdout), "w");
+    fp = strcmp(outbam, "-")? bgzf_open(outbam, "w") : bgzf_dopen(fileno(stdout), "w");
     if (fp == 0) {
         fprintf(stderr, "[%s] ERROR: fail to open output file '%s'.\n", __func__, outbam);
         return 1;
@@ -109,11 +110,11 @@ int bam_cat(int nfn, char * const *fn, const bam_header_t *h, const char* outbam
         
         j=0;
 #ifdef _USE_KNETFILE
-        fp_file=fp->x.fpw;
-        while ((len = knet_read(in->x.fpr, buf, BUF_SIZE)) > 0) {
+        fp_file=fp->fp;
+        while ((len = knet_read(in->fp, buf, BUF_SIZE)) > 0) {
 #else  
-        fp_file=fp->file;
-        while (!feof(in->file) && (len = fread(buf, 1, BUF_SIZE, in->file)) > 0) {
+        fp_file=fp->fp;
+        while (!feof(in->fp) && (len = fread(buf, 1, BUF_SIZE, in->fp)) > 0) {
 #endif
             if(len<es){
                 int diff=es-len;

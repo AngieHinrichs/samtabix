@@ -53,7 +53,7 @@
 /*! @abstract BAM file handler */
 typedef BGZF *bamFile;
 #define bam_open(fn, mode) bgzf_open(fn, mode)
-#define bam_dopen(fd, mode) bgzf_fdopen(fd, mode)
+#define bam_dopen(fd, mode) bgzf_dopen(fd, mode)
 #define bam_close(fp) bgzf_close(fp)
 #define bam_read(fp, buf, size) bgzf_read(fp, buf, size)
 #define bam_write(fp, buf, size) bgzf_write(fp, buf, size)

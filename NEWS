@@ -1,3 +1,27 @@
+Redistribution w/changes as samtabix (12 October, 2012)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compiling with both libbam.a and libtabix.a often results in linker
+conflicts between functions with the same name (e.g. bgzf_read) but
+different implementations in the two libs.  The UCSC Genome Browser
+group has dealt with this by patching tabix to use different function
+names (e.g. ti_bgzf_read) but it's a pain for mirror site
+administrators to have to patch both samtools and tabix, and results
+in a lot of questions to UCSC, and more work to make new patch files
+for every release of tabix and samtools.  This redistribution of
+samtools and tabix in the same package, with UCSC's patches, hopefully
+will make it easier for mirror site admins and anyone who would like
+to link C code with both samtools and tabix.
+
+* index.c and bgzf.[ch] from tabix are included in this directory
+* non-C tabix files and directories (perl and python) are included
+* several files have been patched to enable registration of alternate
+  network library in knetfile.c, to not download the index file to the
+  current directory (UCSC's network library handles network access and
+  sparse-file caching), and to skip EOF checking; see
+  http://genomewiki.ucsc.edu/index.php/KNETFILE_HOOKS
+
+
 Beta Release 0.1.18 (2 September, 2011)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

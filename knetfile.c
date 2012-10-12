@@ -28,6 +28,8 @@
    therefore I decide to heavily annotate this file, for Linux and
    Windows as well.  -ac */
 
+#ifdef _USE_KNETFILE
+
 #include <time.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -716,4 +718,6 @@ int main(void)
 	free(buf);
 	return 0;
 }
+#endif
+
 #endif
